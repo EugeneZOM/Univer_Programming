@@ -1,4 +1,4 @@
-# Univer_Programming
+# University Programming
 Tasks for KSU
 
 <details>
@@ -19,7 +19,11 @@ Tasks for KSU
 <li>Observer</li>
 <li>Prototype</li>
 <li>Proxy</li>
-<li>Singleton
+<li>Singleton</li>
 <li>State</li>
 </ul>
+</details>
+<details>
+<summary>Databases (SQL Tasks)</summary>
+DBMS: MariaDB 10.4.10
 </details>
