@@ -5,9 +5,9 @@ SELECT t.name, c.name, b.title, p.name FROM book b, theme t, category c, publish
 SELECT b.title FROM book b, publisher p WHERE p.id = b.publisher_id AND YEAR(b.date) >= 2000 AND p.name = "BHV С.-Петербург";
 SELECT sum(b.pages), c.name FROM book b, category c WHERE b.category_id = c.id GROUP BY c.name ORDER BY sum(b.pages) DESC;
 SELECT avg(b.cost) FROM book b, theme t, category c WHERE t.id = b.theme_id AND c.id = b.category_id AND t.name = "Використання ПК в цілому" AND c.name = "Linux";
-
-
-
+SELECT b.id, b.title, b.code, b.cost, b.circulation, b.date, b.new, b.pages, c.name as category_name, t.name as theme_name, f.value as format, p.name as publisher FROM book b, category c, format f, publisher p, theme t WHERE b.category_id = c.id AND b.format_id = f.id AND b.publisher_id = p.id AND b.theme_id = t.id;
+SELECT b.id, b.title, b.code, b.cost, b.circulation, b.date, b.new, b.pages, c.name as category_name, t.name as theme_name, f.value as format, p.name as publisher FROM book b INNER JOIN category c ON b.category_id = c.id INNER JOIN format f ON b.format_id = f.id INNER JOIN publisher p ON b.publisher_id = p.id INNER JOIN theme t ON b.theme_id = t.id;
+SELECT b.id, b.title, b.code, b.cost, b.circulation, b.date, b.new, b.pages, c.name as category_name, t.name as theme_name, f.value as format, p.name as publisher FROM book b LEFT JOIN category c ON b.category_id = c.id LEFT JOIN format f ON b.format_id = f.id LEFT JOIN publisher p ON b.publisher_id = p.id LEFT JOIN theme t ON b.theme_id = t.id;
 SELECT b1.title, b2.title FROM book b1, book b2 WHERE b1.pages = b2.pages AND b1.title != b2.title;
 SELECT b1.title, b2.title, b3.title FROM book b1, book b2, book b3 WHERE b1.cost = b2.cost AND b2.cost = b3.cost AND b1.title != b2.title AND b2.title != b3.title AND b1.title != b3.title;
 SELECT b.title FROM book b, (SELECT id FROM category c WHERE c.name = "C & C ++") as r WHERE b.category_id = r.id;
