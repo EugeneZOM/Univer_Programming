@@ -5,18 +5,28 @@ import (
 	"math"
 )
 
-//const Epsilon = (0.5 * math.Pow(10, -6))
+/* Thanks to my classmate */
 
-func formula(x float64) float64 {
-	//return math.Pow(x, 3) - 3 * math.Pow(x, 2) + 6 * x - 2	// #13
-	return math.Sin(x)
+var epsilon = 0.5 * math.Pow(10, -6)
+
+func f(x float64) float64 {
+	return math.Pow(x, 3) - 3 * math.Pow(x, 2) + 6 * x - 2	// #13
 }
+
+func df(x float64) float64 {
+  return 3 * math.Pow(x, 2) - 6 * x + 6
+}
+
+func df_2(x float64) float64 {
+  return 6 * x - 6
+}
+
 
 func findResultsInRange(start, end, step float64) []float64 {
 	results := []float64{}
 
 	for x := start; x <= end; x += step {
-		results = append(results, formula(float64(x)))
+		results = append(results, f(float64(x)))
 	}
 
 	return results;
@@ -40,8 +50,127 @@ func findXofResultsWithDifferentSigns(results []float64, start, end, step float6
 	return pairs
 }
 
-func dihotomie(a, b float64) float64 {
-	return 0.0
+func dihotomieMethod(a, b float64) float64 {
+  c := 0.0
+
+  if f(a) * f(b) > 0 {
+    fmt.Println("Wrong interval")
+    return c
+  }
+
+  for math.Abs(b-a) > epsilon {
+    c = (a + b) / 2.0
+
+    if f(a) * f(c) > 0 {
+      a = c
+    } else {
+      b = c
+    }
+  }
+
+	return c
+}
+
+func newtonMethod(a, b float64) float64 {
+  x, x0 := 0.0, 0.0
+
+  if f(a) * f(b) > 0 {
+    fmt.Println("Wrong interval")
+    return x
+  }
+
+  if f(a) * df_2(a) > 0 {
+    x0 = a
+  } else {
+    x0 = b
+  }
+
+  x = x0 - f(x0) / df(x0)
+
+  for math.Abs(x0-x) > epsilon {
+    x0 = x
+    x = x0 - f(x0) / df(x0)
+  }
+
+	return x
+}
+
+func chordMethod(a, b float64) float64 {
+  x, x0, c := 0.0, 0.0, 0.0
+
+  if f(a) * f(b) > 0 {
+    fmt.Println("Wrong interval")
+    return x
+  }
+
+  if f(a) * df_2(a) < 0 {
+    x0 = a
+    c = b
+  } else {
+    x0 = b
+    c = a
+  }
+
+  x = x0 - f(x0) * (c - x0) / (f(c) - f(x0))
+
+  for math.Abs(x0 - x) > epsilon {
+    x0 = x
+    x = x0 - f(x0) * (c - x0) / (f(c) - f(x0))
+  }
+
+  return x
+}
+
+func combinedMethod(a, b float64) float64 {
+  a0, b0, x, x0 := 0.0, 0.0, 0.0, 0.0
+
+  if f(a) * f(b) > 0 {
+    fmt.Println("Wrong interval")
+    return x
+  }
+
+  if f(a) * df_2(a) > 0 {
+    a0 = a
+    b0 = b
+  } else {
+    a0 = b
+    b0 = a
+  }
+
+  x0 = a0 - f(a0) / df(a0)
+  x = b0 - f(a0) * (x0 - b0) / (f(x0) - f(a0))
+
+  for math.Abs(x0 - x) > epsilon {
+    a0 = x
+    x0 = a0 - f(a0) / df(a0)
+    x = b0 - f(a0) * (x0 - b0) / (f(x0) - f(a0))
+  }
+
+  return x
+}
+
+func iterationMethod(a, b float64) float64 {
+  x, x0, l := 0.0, 0.0, 0.0
+
+  if f(a) * f(b) > 0 {
+    fmt.Println("Wrong interval")
+    return x
+  }
+
+  if math.Abs(df(a)) > math.Abs(df(b)) {
+    l = 1 / df(a)
+  } else {
+    l = 1 / df(b)
+  }
+
+  x0 = a
+
+  for math.Abs(x0 - x) > epsilon {
+    x0 = x
+    x = x0 - l * f(x0)
+  }
+
+  return x
 }
 
 func main() {
@@ -53,29 +182,21 @@ func main() {
 
 	// Get results
 	results := findResultsInRange(start, end, step)
-	fmt.Println("Results:", results)
 
 	// Find x of results with different signs
 	pairs := findXofResultsWithDifferentSigns(results, start, end, step)
 	fmt.Println("Different signs between (x1, x2):", pairs)
 
-	if len(pairs) == 0 {
-		fmt.Println("No results")
-		return
-	}
+  fmt.Println("")
+  for _, p := range pairs {
+    a, b := p[0], p[1]
+    fmt.Printf("--- [%f, %f] ---\n", a, b)
+    fmt.Println("- Dihotomie:", dihotomieMethod(a, b))
+    fmt.Println("- Newton:", newtonMethod(a, b))
+    fmt.Println("- Chord:", chordMethod(a, b))
+    fmt.Println("- Combined:", combinedMethod(a, b))
+    fmt.Println("- Iterations:", iterationMethod(a, b))
+  }
 
-	// Get more accuracy ranges
-	for i := 0; i < len(pairs); i++ {
-		x1, x2 := pairs[i][0], pairs[i][1]
-		step := 0.1
-
-		results := findResultsInRange(x1, x2, step)
-		pairs2 := findXofResultsWithDifferentSigns(results, x1, x2, step)
-
-		if len(pairs2) > 0 {
-			pairs[i] = pairs2[0]
-		}
-	}
-
-	fmt.Println("More accuracy:", pairs)
+  fmt.Println("\nEpsilon:", epsilon)
 }
